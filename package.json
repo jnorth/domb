@@ -1,0 +1,10 @@
+{
+  "name": "domb",
+  "version": "0.0.1",
+  "author": "Joseph North <north@sublink.ca>",
+  "description": "A dumb wrapper around React.createElement.",
+  "keywords": ["react"],
+  "license": "MIT",
+  "repository": "jnorth/domb",
+  "main": "lib/index"
+}
