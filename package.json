@@ -1,6 +1,6 @@
 {
   "name": "domb",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": "Joseph North <north@sublink.ca>",
   "description": "A dumb wrapper around React.createElement.",
   "keywords": ["react"],
