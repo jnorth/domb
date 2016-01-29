@@ -72,7 +72,7 @@ Using `dom` to create a `div` element factory:
 
 ```js
 import React from 'react';
-import { el } from 'domb';
+import { dom } from 'domb';
 
 const div = dom(React, 'div');
 div({ className: 'test' });
