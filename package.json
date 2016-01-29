@@ -6,5 +6,5 @@
   "keywords": ["react"],
   "license": "MIT",
   "repository": "jnorth/domb",
-  "main": "lib/index"
+  "main": "index"
 }

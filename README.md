@@ -8,9 +8,9 @@ prefer it to just be another attribute.
 
 ## Usage
 
-domb exports two functions:
+domb exports three functions:
 
-### `component(React, type, attributes)`
+### `el(React, type, attributes)`
 
 Creates a new React element.
 
@@ -31,7 +31,7 @@ To pass multiple child elements, pass an array via `attributes.content`.
 Finally, if you have a list of child elements that require `key` propertyes,
 pass them as an array via `attributes.children`.
 
-### `factory(React, types)`
+### `dom(React, ...types)`
 
 Creates factory functions that, when called, creates a new React element. This
 is used to cut down on the boilerplate by providing nicely-named functions to
@@ -39,45 +39,62 @@ use directly in your components.
 
 `React` is the React library.
 
-`types` is an array of element types.
+`...types` is one or more element types.
 
-If you want to create a factory function for a single element type, you can pass
-it directly instead of an array.
+If only a single type is given, the factory function will be returned directly.
+If more than one type is given, an object will be returned with name-function
+pairs. For string types, the name is the same as the string. For classes or
+named functions, the key is their `name` propery.
 
-## Example
+### `elif(value, el)`
 
-Using `component` to create a `div` element:
+Sometimes it is useful to create a factory function that only renders its
+element if a condition is met. This allows you to include the element in your
+render tree, without any messy logic handling.
+
+`value` is a boolean value.
+
+`el` is a element factory function, as returned by `dom`.
+
+## Examples
+
+Using `el` to create a `div` element:
 
 ```js
 import React from 'react';
-import { factory as domb, component } from 'domb';
+import { el } from 'domb';
 
-component(React, 'div', { className: 'test' });
+el(React, 'div', { className: 'test' });
 // => React.createElement('div', { className: 'test' });
 ```
 
-Using `factory` to create a `div` element factory:
+Using `dom` to create a `div` element factory:
 
 ```js
-const div = domb(React, 'div');
+import React from 'react';
+import { el } from 'domb';
+
+const div = dom(React, 'div');
 div({ className: 'test' });
 // => React.createElement('div', { className: 'test' });
 ```
 
-Using `factory` to create several element factories.
+Using `dom` to create several element factories.
 
 ```js
-const dom = domb(React, ['div', 'span']);
-dom.div({ className: 'test' });
+const { div, span } = dom(React, 'div', 'span');
+
+div({ className: 'test' });
 // => React.createElement('div', { className: 'test' });
-dom.span({ className: 'test' });
+
+span({ className: 'test' });
 // => React.createElement('span', { className: 'test' });
 ```
 
 Supplying text content to an element:
 
 ```js
-component(React, 'div', {
+el(React, 'div', {
   className: 'test',
   content: 'A test div',
 });
@@ -87,7 +104,7 @@ component(React, 'div', {
 Supplying child elements to an element:
 
 ```js
-const { div, p } = domb(React, 'div', 'p');
+const { div, p } = dom(React, 'div', 'p');
 
 div({
   className: 'test',
@@ -105,16 +122,16 @@ div({
 Using a functional component:
 
 ```js
-function myView(props) {
+function View(props) {
   return div({ className:'test', content:props.label });
 }
 
-component(React, myView, { label:'Hello!' });
-// => React.createElement(myView, { label:'Hello!' });
+el(React, View, { label:'Hello!' });
+// => React.createElement(View, { label:'Hello!' });
 
-const dom = domb(React, myView);
-dom.myView({ label:'Hello!' });
-// => React.createElement(myView, { label:'Hello!' });
+const view = dom(React, myView);
+view({ label:'Hello!' });
+// => React.createElement(View, { label:'Hello!' });
 ```
 
 Using a class component:
@@ -126,19 +143,19 @@ class MyView extends React.Component {
   }
 }
 
-component(React, MyView, { label:'Hello!' });
+el(React, MyView, { label:'Hello!' });
 // => React.createElement(MyView, { label:'Hello!' });
 
-const dom = domb(React, MyView);
-dom.MyView({ label:'Hello!' });
+const myView = dom(React, MyView);
+myView({ label:'Hello!' });
 // => React.createElement(MyView, { label:'Hello!' });
 ```
 
 Using `key`s:
 
 ```js
-function myView(props) {
-  const { ul, li } = domb(React, 'ul', 'li');
+function View(props) {
+  const { ul, li } = dom(React, 'ul', 'li');
 
   return ul({
     // When you need to supply keys, use `children`
@@ -149,13 +166,38 @@ function myView(props) {
   });
 }
 
-const dom = domb(React, myView);
+const view = domb(React, View);
 
-dom.myView({
+view({
   items: [
     { id:0, name:'Item A' },
     { id:1, name:'Item B' },
     { id:2, name:'Item C' },
   ],
 });
+```
+
+Using `elif`:
+
+```js
+function Profile({ user }) {
+  const { div, img, a } = dom(React, 'div', 'img', 'a');
+
+  const profileImage = elif(user.isLoggedIn, img);
+  const loginLink = elif(!user.isLoggedIn, a);
+
+  return div({
+    className: 'profile',
+    content: [
+      profileImage({
+        src: user.image,
+      }),
+
+      loginLink({
+        href: '/login',
+        content: 'Login',
+      }),
+    ],
+  });
+}
 ```
